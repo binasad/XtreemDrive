@@ -14,7 +14,7 @@ export default function TopAppBar({
   showThemeToggle,
 }) {
   const { colors, toggle, mode } = useTheme();
-  const paddingTop = Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 12 : 60;
+  const paddingTop = 8;
 
   return (
     <View

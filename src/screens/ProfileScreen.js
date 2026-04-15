@@ -82,7 +82,7 @@ export default function ProfileScreen({ navigation }) {
         />
       </SafeAreaView>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         <View
           style={[
             styles.hero,
@@ -342,7 +342,7 @@ function Divider({ color }) {
 const styles = StyleSheet.create({
   hero: {
     alignItems: 'center',
-    paddingVertical: 24,
+    paddingVertical: 12,
     marginHorizontal: 16,
     borderRadius: 24,
     borderWidth: StyleSheet.hairlineWidth,
