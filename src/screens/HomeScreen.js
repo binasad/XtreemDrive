@@ -143,7 +143,7 @@ export default function HomeScreen({ navigation }) {
       </SafeAreaView>
 
       {/* Sticky Search & Bar */}
-      <View style={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4 }}>
+      <View style={{ paddingHorizontal: 16, paddingTop: 0, paddingBottom: 4 }}>
         <View
           style={[
             styles.searchBox,
@@ -245,7 +245,7 @@ export default function HomeScreen({ navigation }) {
             keyExtractor={(item) => item.id}
             numColumns={1}
             key="search-list"
-            contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 120 }}
+            contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }}
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}
@@ -267,7 +267,7 @@ export default function HomeScreen({ navigation }) {
         </View>
       ) : (
         <ScrollView
-          contentContainerStyle={{ paddingBottom: 120 }}
+          contentContainerStyle={{ paddingBottom: 40 }}
           showsVerticalScrollIndicator={false}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
         >
@@ -275,7 +275,7 @@ export default function HomeScreen({ navigation }) {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12 }}
+            contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 8 }}
           >
             {QUICK_FILTERS.map((f, i) => {
               const active = activeQuickFilter === i;
@@ -299,7 +299,7 @@ export default function HomeScreen({ navigation }) {
           </ScrollView>
 
           {/* Hero Section */}
-          <View style={{ paddingHorizontal: 20, paddingTop: 10, marginBottom: 24 }}>
+          <View style={{ paddingHorizontal: 20, paddingTop: 4, marginBottom: 16 }}>
             <Text style={[styles.heroTitle, { color: colors.text, fontSize: 32, fontWeight: '900', letterSpacing: -0.5 }]}>
               Find your next{'\n'}
               <Text style={{ color: colors.primary, fontStyle: 'italic' }}>masterpiece.</Text>

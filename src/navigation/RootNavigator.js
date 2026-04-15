@@ -15,6 +15,8 @@ import HomeScreen from '../screens/HomeScreen';
 import SearchResultsScreen from '../screens/SearchResultsScreen';
 import CarDetailsScreen from '../screens/CarDetailsScreen';
 import SellCarScreen from '../screens/SellCarScreen';
+import PostAdScreen from '../screens/PostAdScreen';
+// SellCarScreen is used as both the Sell tab landing and the sell flow entry
 import ChatListScreen from '../screens/ChatListScreen';
 import ChatDetailScreen from '../screens/ChatDetailScreen';
 import ProfileScreen from '../screens/ProfileScreen';
@@ -31,6 +33,13 @@ import NewsDetailScreen from '../screens/NewsDetailScreen';
 import BoostListingScreen from '../screens/BoostListingScreen';
 import ManageListingScreen from '../screens/ManageListingScreen';
 import SellForMeScreen from '../screens/SellForMeScreen';
+import EmiCalculatorScreen from '../screens/EmiCalculatorScreen';
+import CarValuationScreen from '../screens/CarValuationScreen';
+import InspectionBookingScreen from '../screens/InspectionBookingScreen';
+import VideosScreen from '../screens/VideosScreen';
+import ForumsScreen from '../screens/ForumsScreen';
+import SavedSearchesScreen from '../screens/SavedSearchesScreen';
+import DealersScreen from '../screens/DealersScreen';
 import {
   EmptyFavorites,
   EmptySearch,
@@ -183,6 +192,18 @@ export default function RootNavigator() {
         <Stack.Screen name="BoostListing" component={BoostListingScreen} />
         <Stack.Screen name="ManageListing" component={ManageListingScreen} />
         <Stack.Screen name="SellForMe" component={SellForMeScreen} />
+        {/* SellCarScreen is now the Sell tab landing page */}
+        <Stack.Screen name="PostAd" component={PostAdScreen} />
+        {/* Tools & services */}
+        <Stack.Screen name="EmiCalculator" component={EmiCalculatorScreen} />
+        <Stack.Screen name="CarValuation" component={CarValuationScreen} />
+        <Stack.Screen name="InspectionBooking" component={InspectionBookingScreen} />
+        {/* Community, discovery, alerts */}
+        <Stack.Screen name="Videos" component={VideosScreen} />
+        <Stack.Screen name="Forums" component={ForumsScreen} />
+        <Stack.Screen name="SavedSearches" component={SavedSearchesScreen} />
+        <Stack.Screen name="Dealers" component={DealersScreen} />
+        <Stack.Screen name="SearchResults" component={SearchResultsScreen} />
         {/* End new screens */}
         <Stack.Screen name="Favorites" component={EmptyFavorites} />
         <Stack.Screen name="EmptySearch" component={EmptySearch} />

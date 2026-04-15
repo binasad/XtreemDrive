@@ -21,6 +21,24 @@ const SECTIONS = [
       { icon: 'build', label: 'Auto Store', route: 'AutoStore' },
       { icon: 'compare-arrows', label: 'Compare Cars', route: 'CarComparison' },
       { icon: 'article', label: 'News & Reviews', route: 'News' },
+      { icon: 'play-circle-outline', label: 'Video Reviews', route: 'Videos' },
+      { icon: 'store', label: 'Dealers & Showrooms', route: 'Dealers' },
+    ],
+  },
+  {
+    title: 'Tools & Services',
+    items: [
+      { icon: 'account-balance', label: 'EMI Calculator', route: 'EmiCalculator' },
+      { icon: 'price-check', label: 'Car Valuation', route: 'CarValuation' },
+      { icon: 'verified-user', label: 'Book Inspection', route: 'InspectionBooking' },
+      { icon: 'storefront', label: 'Sell It For Me', route: 'SellForMe' },
+    ],
+  },
+  {
+    title: 'Community',
+    items: [
+      { icon: 'forum', label: 'Forums', route: 'Forums' },
+      { icon: 'bookmark', label: 'Saved Searches', route: 'SavedSearches' },
     ],
   },
   {
