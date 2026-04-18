@@ -31,7 +31,8 @@ const SETTINGS = [
 ];
 
 export default function NotificationSettingsScreen({ navigation }) {
-  const { colors, radius } = useTheme();
+  const { colors, radius, mode } = useTheme();
+  const iconColor = mode === 'light' ? '#000000' : colors.primary;
   const [master, setMaster] = useState(true);
   const [state, setState] = useState({
     msg: true,
@@ -100,8 +101,8 @@ export default function NotificationSettingsScreen({ navigation }) {
                   { backgroundColor: colors.surfaceAlt, borderRadius: radius.md },
                 ]}
               >
-                <View style={[styles.iconBox, { backgroundColor: colors.primaryMuted }]}>
-                  <MaterialIcons name={item.icon} size={20} color={colors.primary} />
+                <View style={styles.iconBox}>
+                  <MaterialIcons name={item.icon} size={22} color={iconColor} />
                 </View>
                 <View style={{ flex: 1, marginLeft: 12 }}>
                   <Text style={{ color: colors.text, fontWeight: '800' }}>{item.title}</Text>

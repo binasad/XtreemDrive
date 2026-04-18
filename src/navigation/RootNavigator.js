@@ -15,8 +15,8 @@ import HomeScreen from '../screens/HomeScreen';
 import SearchResultsScreen from '../screens/SearchResultsScreen';
 import CarDetailsScreen from '../screens/CarDetailsScreen';
 import SellCarScreen from '../screens/SellCarScreen';
+import SellLandingScreen from '../screens/SellLandingScreen';
 import PostAdScreen from '../screens/PostAdScreen';
-// SellCarScreen is used as both the Sell tab landing and the sell flow entry
 import ChatListScreen from '../screens/ChatListScreen';
 import ChatDetailScreen from '../screens/ChatDetailScreen';
 import ProfileScreen from '../screens/ProfileScreen';
@@ -115,6 +115,14 @@ function CustomTabBar({ state, descriptors, navigation }) {
   );
 }
 
+function SellStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="SellLanding" component={SellLandingScreen} />
+    </Stack.Navigator>
+  );
+}
+
 function MainTabs() {
   return (
     <Tab.Navigator
@@ -133,7 +141,7 @@ function MainTabs() {
       />
       <Tab.Screen
         name="Sell"
-        component={SellCarScreen}
+        component={SellStack}
         options={{ tabBarIconName: 'add-circle', tabBarLabel: 'SELL' }}
       />
       <Tab.Screen
@@ -180,10 +188,14 @@ export default function RootNavigator() {
         <Stack.Screen name="Notifications" component={NotificationsScreen} />
         <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
         <Stack.Screen name="SellerDashboard" component={SellerDashboardScreen} />
+        <Stack.Screen name="SellMyself" component={SellCarScreen} />
+        <Stack.Screen name="SellForMe" component={SellForMeScreen} />
+        <Stack.Screen name="PostAd" component={PostAdScreen} />
         {/* New PakWheels-inspired screens */}
         <Stack.Screen name="NewCars" component={NewCarsScreen} />
         <Stack.Screen name="NewCarDetail" component={NewCarDetailScreen} />
         <Stack.Screen name="Bikes" component={BikesScreen} />
+        <Stack.Screen name="BikeDetails" component={require('../screens/BikeDetailsScreen').default} />
         <Stack.Screen name="AutoStore" component={AutoStoreScreen} />
         <Stack.Screen name="CarComparison" component={CarComparisonScreen} />
         <Stack.Screen name="News" component={NewsScreen} />
@@ -191,9 +203,6 @@ export default function RootNavigator() {
         {/* Seller flow screens */}
         <Stack.Screen name="BoostListing" component={BoostListingScreen} />
         <Stack.Screen name="ManageListing" component={ManageListingScreen} />
-        <Stack.Screen name="SellForMe" component={SellForMeScreen} />
-        {/* SellCarScreen is now the Sell tab landing page */}
-        <Stack.Screen name="PostAd" component={PostAdScreen} />
         {/* Tools & services */}
         <Stack.Screen name="EmiCalculator" component={EmiCalculatorScreen} />
         <Stack.Screen name="CarValuation" component={CarValuationScreen} />

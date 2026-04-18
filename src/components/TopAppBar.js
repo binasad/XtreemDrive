@@ -41,7 +41,7 @@ export default function TopAppBar({
 
         <View style={styles.rightGroup}>
           {showThemeToggle && (
-            <TouchableOpacity onPress={toggle} style={[styles.iconBtn, { marginRight: 12 }]} hitSlop={10}>
+            <TouchableOpacity onPress={toggle} style={[styles.iconBtn, { marginRight: 2 }]} hitSlop={10}>
               <MaterialIcons
                 name={mode === 'dark' ? 'light-mode' : 'dark-mode'}
                 size={22}
@@ -50,7 +50,7 @@ export default function TopAppBar({
             </TouchableOpacity>
           )}
           {secondRightIcon && (
-            <TouchableOpacity onPress={onSecondRightPress} style={[styles.iconBtn, { marginRight: 12 }]} hitSlop={10}>
+            <TouchableOpacity onPress={onSecondRightPress} style={[styles.iconBtn, { marginRight: 2 }]} hitSlop={10}>
               <MaterialIcons name={secondRightIcon} size={22} color={colors.text} />
             </TouchableOpacity>
           )}

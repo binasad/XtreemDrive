@@ -18,7 +18,7 @@ import PrimaryButton from '../components/PrimaryButton';
 const { width } = Dimensions.get('window');
 
 export default function NewCarDetailScreen({ route, navigation }) {
-  const { colors, radius } = useTheme();
+  const { colors, radius, mode } = useTheme();
   const car = route?.params?.car || {
     title: 'Toyota Corolla',
     price: 'PKR 61.94 - 78.04 Lac',
@@ -64,13 +64,7 @@ export default function NewCarDetailScreen({ route, navigation }) {
 
         <View style={{ padding: 20 }}>
           <Text style={[styles.title, { color: colors.text }]}>{car.title}</Text>
-          <Text style={[styles.price, { color: colors.primary }]}>{car.price}</Text>
-
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
-            <MaterialIcons name="star" size={16} color={colors.primary} />
-            <Text style={{ color: colors.text, fontWeight: '800', marginLeft: 4 }}>{car.rating}</Text>
-            <Text style={{ color: colors.textMuted, marginLeft: 6 }}>({car.reviews} reviews)</Text>
-          </View>
+          <Text style={[styles.price, { color: mode === 'light' ? '#000000' : colors.primary }]}>{car.price}</Text>
 
           {/* Specs Grid */}
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Key Specifications</Text>

@@ -145,9 +145,9 @@ export default function ManageListingScreen({ route, navigation }) {
           </Text>
           <Text style={{ color: colors.textMuted, marginTop: 4 }}>Changes will be reflected instantly</Text>
 
-          <EditField label="Title" value={editForm.title} onChange={(v) => setEditForm({...editForm, title: v})} colors={colors} />
-          <EditField label="Price (PKR)" value={editForm.price} onChange={(v) => setEditForm({...editForm, price: v})} colors={colors} />
-          <EditField label="Description" value={editForm.description} onChange={(v) => setEditForm({...editForm, description: v})} colors={colors} multiline />
+          <EditField label="Title" value={editForm.title} onChange={(v) => setEditForm({ ...editForm, title: v })} colors={colors} />
+          <EditField label="Price (PKR)" value={editForm.price} onChange={(v) => setEditForm({ ...editForm, price: v })} colors={colors} />
+          <EditField label="Description" value={editForm.description} onChange={(v) => setEditForm({ ...editForm, description: v })} colors={colors} multiline />
 
           {/* Photo Management */}
           <Text style={[styles.editSubHeader, { color: colors.text }]}>Photos</Text>

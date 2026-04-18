@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -17,7 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 import TopAppBar from '../components/TopAppBar';
 import FiltersSheet from '../components/FiltersSheet';
-import { FeaturedCarCard, ListCarCard } from '../components/CarCard';
+import { FeaturedCarCard, ListCarCard, GridCarCard } from '../components/CarCard';
 import {
   featuredCars, categories, services, newCars,
   newsArticles
@@ -25,25 +25,60 @@ import {
 
 const { width: SCREEN_W } = Dimensions.get('window');
 
-const QUICK_FILTERS = ['All', 'Sedan', 'SUV', 'Hatchback', 'Under 50 Lac', 'Automatic', 'Diesel'];
+const QUICK_FILTERS = [
+  { label: 'All',          icon: 'apps' },
+  { label: 'Sedan',        icon: 'directions-car' },
+  { label: 'SUV',          icon: 'airport-shuttle' },
+  { label: 'Hatchback',    icon: 'directions-car' },
+  { label: 'Under 50 Lac', icon: 'payments' },
+  { label: 'Automatic',    icon: 'settings' },
+  { label: 'Diesel',       icon: 'local-gas-station' },
+];
 const SORT_OPTIONS = ['Newest', 'Price: Low', 'Price: High', 'Popular'];
 
 // Tag-matchable filter keys from the sheet (values are arrays of strings)
-const TAG_FILTER_KEYS = ['body', 'transmission', 'fuel', 'assembly', 'color'];
+const TAG_FILTER_KEYS = ['body', 'transmission', 'fuel', 'assembly', 'color', 'doors', 'seating', 'engineCapacity', 'properties'];
 
 function countFilters(f = {}) {
   let n = 0;
   for (const k of Object.keys(f)) {
     const v = f[k];
     if (Array.isArray(v)) n += v.length;
-    else if (v) n += 1;
+    else if (v && v !== '') {
+      // Count custom range inputs as single filters
+      if (['priceMin', 'priceMax', 'mileageMin', 'mileageMax', 'engineMin', 'engineMax', 'yearMin', 'yearMax', 'keyword'].includes(k)) {
+        // Only count once per pair for cleaner badge count
+        if (k === 'priceMin' && f.priceMin) n += 0.5;
+        else if (k === 'priceMax' && f.priceMax) n += 0.5;
+        else if (k === 'mileageMin' && f.mileageMin) n += 0.5;
+        else if (k === 'mileageMax' && f.mileageMax) n += 0.5;
+        else if (k === 'engineMin' && f.engineMin) n += 0.5;
+        else if (k === 'engineMax' && f.engineMax) n += 0.5;
+        else if (k === 'yearMin' && f.yearMin) n += 0.5;
+        else if (k === 'yearMax' && f.yearMax) n += 0.5;
+        else if (k === 'keyword') n += 1;
+      } else {
+        n += 1;
+      }
+    }
   }
-  return n;
+  return Math.round(n);
 }
 
 function applySheetFilters(list, f = {}) {
   let out = list;
 
+  // Keyword search
+  if (f.keyword?.trim()) {
+    const kw = f.keyword.toLowerCase();
+    out = out.filter((c) =>
+      c.title?.toLowerCase().includes(kw) ||
+      c.location?.toLowerCase().includes(kw) ||
+      c.description?.toLowerCase().includes(kw)
+    );
+  }
+
+  // Location filters
   if (f.cities?.length) {
     const lower = f.cities.map((c) => c.toLowerCase());
     out = out.filter((c) =>
@@ -51,6 +86,14 @@ function applySheetFilters(list, f = {}) {
     );
   }
 
+  if (f.registeredIn?.length) {
+    const lower = f.registeredIn.map((c) => c.toLowerCase());
+    out = out.filter((c) =>
+      lower.some((city) => c.registeredIn?.toLowerCase().includes(city))
+    );
+  }
+
+  // Make & Model
   if (f.makes?.length) {
     const lower = f.makes.map((m) => m.toLowerCase());
     out = out.filter((c) =>
@@ -58,11 +101,81 @@ function applySheetFilters(list, f = {}) {
     );
   }
 
+  if (f.models?.length) {
+    const lower = f.models.map((m) => m.toLowerCase());
+    out = out.filter((c) =>
+      lower.some((model) => c.title?.toLowerCase().includes(model))
+    );
+  }
+
+  // Year range
   const yMin = parseInt(f.yearMin, 10);
   const yMax = parseInt(f.yearMax, 10);
   if (!Number.isNaN(yMin)) out = out.filter((c) => (c.year ?? 0) >= yMin);
   if (!Number.isNaN(yMax)) out = out.filter((c) => (c.year ?? 9999) <= yMax);
 
+  // Price range (presets + custom)
+  let priceFilters = [];
+  if (f.price?.length) {
+    const priceMap = {
+      'Under 10 Lac': { min: 0, max: 1000000 },
+      '10–25 Lac': { min: 1000000, max: 2500000 },
+      '25–50 Lac': { min: 2500000, max: 5000000 },
+      '50 Lac – 1 Cr': { min: 5000000, max: 10000000 },
+      '1 Cr – 2 Cr': { min: 10000000, max: 20000000 },
+      'Above 2 Cr': { min: 20000000, max: 999999999 },
+    };
+    priceFilters = f.price.map((p) => priceMap[p]).filter(Boolean);
+  }
+  // Custom price range
+  const pMin = parseInt(f.priceMin, 10);
+  const pMax = parseInt(f.priceMax, 10);
+  if (!Number.isNaN(pMin) || !Number.isNaN(pMax)) {
+    priceFilters.push({
+      min: Number.isNaN(pMin) ? 0 : pMin,
+      max: Number.isNaN(pMax) ? 999999999 : pMax,
+    });
+  }
+  if (priceFilters.length > 0) {
+    out = out.filter((c) =>
+      priceFilters.some((r) => (c.price ?? 0) >= r.min && (c.price ?? 0) <= r.max)
+    );
+  }
+
+  // Mileage (KMs driven) - presets + custom
+  let mileageFilters = [];
+  if (f.mileage?.length) {
+    const mileageMap = {
+      'Under 20k': { min: 0, max: 20000 },
+      '20k–50k': { min: 20000, max: 50000 },
+      '50k–100k': { min: 50000, max: 100000 },
+      '100k–200k': { min: 100000, max: 200000 },
+      'Above 200k': { min: 200000, max: 999999999 },
+    };
+    mileageFilters = f.mileage.map((m) => mileageMap[m]).filter(Boolean);
+  }
+  // Custom mileage range
+  const miMin = parseInt(f.mileageMin, 10);
+  const miMax = parseInt(f.mileageMax, 10);
+  if (!Number.isNaN(miMin) || !Number.isNaN(miMax)) {
+    mileageFilters.push({
+      min: Number.isNaN(miMin) ? 0 : miMin,
+      max: Number.isNaN(miMax) ? 999999999 : miMax,
+    });
+  }
+  if (mileageFilters.length > 0) {
+    out = out.filter((c) =>
+      mileageFilters.some((r) => (c.mileage ?? 0) >= r.min && (c.mileage ?? 0) <= r.max)
+    );
+  }
+
+  // Engine Capacity custom range
+  const eMin = parseInt(f.engineMin, 10);
+  const eMax = parseInt(f.engineMax, 10);
+  if (!Number.isNaN(eMin)) out = out.filter((c) => (c.engineCapacity ?? 0) >= eMin);
+  if (!Number.isNaN(eMax)) out = out.filter((c) => (c.engineCapacity ?? 9999999) <= eMax);
+
+  // Tag-matchable filters
   for (const key of TAG_FILTER_KEYS) {
     const values = f[key];
     if (values?.length) {
@@ -89,6 +202,7 @@ export default function HomeScreen({ navigation }) {
   const [appliedFilters, setAppliedFilters] = useState({});
   const [showSort, setShowSort] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [isGrid, setIsGrid] = useState(false);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -96,31 +210,46 @@ export default function HomeScreen({ navigation }) {
   }, []);
 
   const searchInputRef = useRef(null);
-  const activeFilterCount = countFilters(appliedFilters);
+  const activeFilterCount = useMemo(() => countFilters(appliedFilters), [appliedFilters]);
 
-  let results = [...featuredCars];
+  const results = useMemo(() => {
+    let out = featuredCars;
 
-  if (query) {
-    const q = query.toLowerCase();
-    results = results.filter(c =>
-      c.title.toLowerCase().includes(q) ||
-      c.location?.toLowerCase().includes(q)
-    );
-  }
+    if (query) {
+      const q = query.toLowerCase();
+      out = out.filter(c =>
+        c.title.toLowerCase().includes(q) ||
+        c.location?.toLowerCase().includes(q)
+      );
+    }
 
-  if (activeQuickFilter > 0) {
-    const f = QUICK_FILTERS[activeQuickFilter].toLowerCase();
-    results = results.filter(c => {
-      if (f.includes('lac')) return true; 
-      return c.tags?.some(t => t.toLowerCase().includes(f)) ||
-        c.title.toLowerCase().includes(f);
-    });
-  }
+    if (activeQuickFilter > 0) {
+      const f = QUICK_FILTERS[activeQuickFilter].label.toLowerCase();
+      out = out.filter(c => {
+        if (f.includes('lac')) return true;
+        return c.tags?.some(t => t.toLowerCase().includes(f)) ||
+          c.title.toLowerCase().includes(f);
+      });
+    }
 
-  results = applySheetFilters(results, appliedFilters);
+    out = applySheetFilters(out, appliedFilters);
 
-  if (sortIdx === 1) results.sort((a, b) => parseFloat(a.price.replace(/[^0-9.]/g, '')) - parseFloat(b.price.replace(/[^0-9.]/g, '')));
-  if (sortIdx === 2) results.sort((a, b) => parseFloat(b.price.replace(/[^0-9.]/g, '')) - parseFloat(a.price.replace(/[^0-9.]/g, '')));
+    if (sortIdx === 1 || sortIdx === 2) {
+      out = [...out].sort((a, b) => {
+        const av = parseFloat(a.price.replace(/[^0-9.]/g, ''));
+        const bv = parseFloat(b.price.replace(/[^0-9.]/g, ''));
+        return sortIdx === 1 ? av - bv : bv - av;
+      });
+    }
+
+    return out;
+  }, [query, activeQuickFilter, appliedFilters, sortIdx]);
+
+  const handleApplyFilters = useCallback((f) => {
+    setAppliedFilters(f);
+    setSearching(true);
+  }, []);
+  const handleCloseFilters = useCallback(() => setShowFilters(false), []);
 
   const exitSearch = () => {
     setSearching(false);
@@ -194,18 +323,7 @@ export default function HomeScreen({ navigation }) {
       {/* Content Rendering */}
       {searching || query.length > 0 ? (
         <View style={{ flex: 1 }}>
-          <View style={{ paddingHorizontal: 20, paddingVertical: 20 }}>
-            <Text style={{ color: colors.primary, fontSize: 11, fontWeight: '800', letterSpacing: 2, textTransform: 'uppercase' }}>
-              Marketplace Results
-            </Text>
-            <Text style={{ color: colors.text, fontSize: 32, fontWeight: '900', letterSpacing: -1, marginTop: 4 }}>
-              Precision Performance
-            </Text>
-            <Text style={{ color: colors.textMuted, fontSize: 13, marginTop: 6 }}>
-              {results.length} hand-selected vehicles found in your area.
-            </Text>
-          </View>
-
+          
           <View style={[styles.resultsHeader, { borderBottomWidth: 0, paddingTop: 0 }]}>
             <TouchableOpacity
               onPress={() => setShowFilters(true)}
@@ -255,12 +373,10 @@ export default function HomeScreen({ navigation }) {
               />
             }
             renderItem={({ item }) => (
-              <PremiumSearchCard 
+              <ListCarCard 
                 car={item} 
-                colors={colors} 
-                radius={radius} 
-                isLight={isLight}
                 onPress={() => navigation.navigate('CarDetails', { car: item })}
+                onFav={() => {}}
               />
             )}
           />
@@ -275,24 +391,34 @@ export default function HomeScreen({ navigation }) {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 8 }}
+            contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 10, paddingBottom: 4, gap: 8 }}
           >
             {QUICK_FILTERS.map((f, i) => {
               const active = activeQuickFilter === i;
+              const activeBg = isDark ? colors.primary : '#111111';
               return (
                 <TouchableOpacity
-                  key={f}
+                  key={f.label}
                   onPress={() => { setActiveQuickFilter(i); if (i > 0) setSearching(true); }}
+                  activeOpacity={0.75}
                   style={[
-                    styles.chip,
+                    styles.quickFilterCard,
                     {
-                      backgroundColor: active ? (isDark ? colors.primary : '#111111') : colors.surfaceAlt,
-                      borderColor: active ? (isDark ? colors.primary : '#111111') : colors.border,
+                      backgroundColor: active ? activeBg : (isDark ? colors.surfaceAlt : '#f4f4f5'),
+                      borderColor: active ? activeBg : (isDark ? colors.border : '#e0e0e0'),
                     },
                   ]}
                 >
-                  {active && i > 0 && <MaterialIcons name="check" size={14} color="#fff" style={{ marginRight: 4 }} />}
-                  <Text style={{ color: active ? '#fff' : colors.text, fontSize: 11, fontWeight: '700' }}>{f}</Text>
+                  <MaterialIcons
+                    name={f.icon}
+                    size={20}
+                    color={active ? '#fff' : (isDark ? colors.textMuted : '#555')}
+                    style={{ marginBottom: 4 }}
+                  />
+                  <Text style={{ color: active ? '#fff' : colors.text, fontSize: 11, fontWeight: '700' }}>{f.label}</Text>
+                  {active && i > 0 && (
+                    <View style={[styles.activeFilterDot, { backgroundColor: isDark ? '#ffffff40' : '#ffffff40' }]} />
+                  )}
                 </TouchableOpacity>
               );
             })}
@@ -316,24 +442,24 @@ export default function HomeScreen({ navigation }) {
               style={[styles.bigTile, { backgroundColor: isDark ? colors.surfaceAlt : colors.primary + '1A', borderRadius: 32 }]}
             >
               <View>
-                <Text style={[styles.bigTileTitle, { color: colors.primary }]}>Used Cars</Text>
-                <Text style={{ color: colors.primary + 'B3', fontSize: 12, marginTop: 4 }}>Verified pre-owned</Text>
+                <Text style={[styles.bigTileTitle, { color: isDark ? '#ffffff' : '#000000' }]}>Used Cars</Text>
+                <Text style={{ color: isDark ? '#ffffff' : '#000000', fontSize: 12, marginTop: 4 }}>Verified pre-owned</Text>
               </View>
               <MaterialIcons name="directions-car" size={56} color={colors.primary + '40'} style={{ alignSelf: 'flex-end' }} />
             </TouchableOpacity>
             <View style={{ flex: 1, marginLeft: 12 }}>
               <TouchableOpacity
                 onPress={() => navigation.navigate('NewCars')}
-                style={[styles.smallTile, { backgroundColor: isDark ? colors.surfaceAlt : colors.secondary + '1A', borderRadius: 24, marginBottom: 12, height: 74 }]}
+                style={[styles.smallTile, { backgroundColor: isDark ? colors.surfaceAlt : '#006f621A', borderRadius: 24, marginBottom: 12, height: 74 }]}
               >
-                <Text style={{ color: isDark ? colors.text : colors.secondary, fontWeight: '800' }}>New Cars</Text>
-                <MaterialIcons name="new-releases" size={24} color={isDark ? colors.primary : colors.secondary + '80'} />
+                <Text style={{ color: isDark ? '#ffffff' : '#000000', fontWeight: '800' }}>New Cars</Text>
+                <MaterialIcons name="new-releases" size={24} color={isDark ? colors.primary : '#006f6280'} />
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => navigation.navigate('Bikes')}
                 style={[styles.smallTile, { backgroundColor: isDark ? colors.surfaceAlt : '#006f621A', borderRadius: 24, height: 74 }]}
               >
-                <Text style={{ color: isDark ? colors.text : '#006f62', fontWeight: '800' }}>Bikes</Text>
+                <Text style={{ color: isDark ? '#ffffff' : '#000000', fontWeight: '800' }}>Bikes</Text>
                 <MaterialIcons name="two-wheeler" size={24} color={isDark ? colors.primary : '#006f6280'} />
               </TouchableOpacity>
             </View>
@@ -397,9 +523,9 @@ export default function HomeScreen({ navigation }) {
 
       <FiltersSheet
         visible={showFilters}
-        onClose={() => setShowFilters(false)}
+        onClose={handleCloseFilters}
         initial={appliedFilters}
-        onApply={(f) => { setAppliedFilters(f); setSearching(true); }}
+        onApply={handleApplyFilters}
       />
     </View>
   );
@@ -445,18 +571,15 @@ function PremiumSearchCard({ car, colors, radius, isLight, onPress }) {
             paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20,
             flexDirection: 'row', alignItems: 'center'
           }}>
-            <MaterialIcons name="verified" size={12} color={colors.primary} />
-            <Text style={{ color: colors.primary, fontSize: 10, fontWeight: '900', marginLeft: 4 }}>VERIFIED</Text>
+            <MaterialIcons name="verified" size={14} color={colors.primary} />
           </View>
         </View>
       </View>
       <View style={{ padding: 24 }}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <View>
-            <Text style={{ color: colors.text, fontSize: 22, fontWeight: '800' }}>{car.title}</Text>
-            <Text style={{ color: colors.textMuted, fontSize: 12 }}>{car.make} • {car.year}</Text>
-          </View>
-          <Text style={{ color: colors.primary, fontSize: 22, fontWeight: '900' }}>{car.price}</Text>
+        <View>
+          <Text style={{ color: colors.text, fontSize: 22, fontWeight: '800' }}>{car.title}</Text>
+          <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 4 }}>{car.make} • {car.year}</Text>
+          <Text style={{ color: colors.primary, fontSize: 22, fontWeight: '900', marginTop: 8 }}>{car.price}</Text>
         </View>
         <TouchableOpacity 
           onPress={onPress}
@@ -477,6 +600,22 @@ function PremiumSearchCard({ car, colors, radius, isLight, onPress }) {
 
 const styles = StyleSheet.create({
   heroTitle: { fontSize: 26, fontWeight: '900', lineHeight: 32 },
+  quickFilterCard: {
+    width: 72,
+    paddingVertical: 10,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+  },
+  activeFilterDot: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
   searchBox: {
     flexDirection: 'row', alignItems: 'center',
     paddingLeft: 14, paddingVertical: 4, paddingRight: 4,

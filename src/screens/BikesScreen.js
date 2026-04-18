@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,8 @@ import TopAppBar from '../components/TopAppBar';
 import { bikes } from '../data/mock';
 
 export default function BikesScreen({ navigation }) {
-  const { colors, radius } = useTheme();
+  const { colors, radius, mode } = useTheme();
+  const [isGrid, setIsGrid] = useState(true);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -23,6 +24,8 @@ export default function BikesScreen({ navigation }) {
           title="BIKES"
           leftIcon="arrow-back"
           onLeftPress={() => navigation.goBack()}
+          secondRightIcon={isGrid ? "view-list" : "grid-view"}
+          onSecondRightPress={() => setIsGrid(!isGrid)}
           rightIcon="search"
         />
       </SafeAreaView>
@@ -61,23 +64,48 @@ export default function BikesScreen({ navigation }) {
           ))}
         </ScrollView>
 
-        {/* Bike grid */}
-        <View style={styles.grid}>
+        {/* Bike grid/list */}
+        <View style={isGrid ? styles.gridWrap : styles.listWrap}>
           {bikes.map((bike) => (
             <TouchableOpacity
               key={bike.id}
-              style={[styles.card, { backgroundColor: colors.surfaceAlt, borderRadius: radius.lg }]}
+              onPress={() => navigation.navigate('BikeDetails', { bike })}
+              style={[isGrid ? styles.cardGrid : styles.cardList, { backgroundColor: colors.surfaceAlt, borderRadius: radius.lg }]}
             >
-              <Image source={{ uri: bike.image }} style={styles.cardImg} />
-              <View style={{ padding: 12 }}>
-                <Text style={{ color: colors.text, fontWeight: '800', fontSize: 14 }} numberOfLines={1}>
-                  {bike.title}
-                </Text>
-                <Text style={{ color: colors.primary, fontWeight: '900', fontSize: 13, marginTop: 6 }}>
+              <Image source={{ uri: bike.image }} style={isGrid ? styles.imgGrid : styles.imgList} />
+              <View style={isGrid ? styles.detailsGrid : styles.detailsList}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <Text style={{ color: colors.text, fontWeight: '800', fontSize: 14, flex: 1, marginRight: 8 }} numberOfLines={1}>
+                    {bike.title}
+                  </Text>
+                  <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                    <MaterialIcons name="favorite-border" size={18} color={colors.textMuted} />
+                  </TouchableOpacity>
+                </View>
+                <Text style={{ color: mode === 'light' ? '#000000' : colors.primary, fontWeight: '900', fontSize: 13, marginTop: 4 }}>
                   {bike.price}
                 </Text>
-                <View style={[styles.chipSmall, { backgroundColor: colors.primaryMuted, marginTop: 8 }]}>
-                  <Text style={{ color: colors.primary, fontSize: 10, fontWeight: '900' }}>VIEW DETAILS</Text>
+                <View style={{ marginTop: 8 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <MaterialIcons name="local-gas-station" size={11} color={colors.textMuted} />
+                      <Text style={{ color: colors.textMuted, fontSize: 10, marginLeft: 4 }}>Fuel</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <MaterialIcons name="speed" size={11} color={colors.textMuted} />
+                      <Text style={{ color: colors.textMuted, fontSize: 10, marginLeft: 4 }}>{bike.mileage || '0 km'}</Text>
+                    </View>
+                  </View>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                      <MaterialIcons name="location-on" size={11} color={colors.textMuted} />
+                      <Text style={{ color: colors.textMuted, fontSize: 10, marginLeft: 4 }} numberOfLines={1}>{bike.location || 'Karachi'}</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <MaterialIcons name="calendar-today" size={11} color={colors.textMuted} />
+                      <Text style={{ color: colors.textMuted, fontSize: 10, marginLeft: 4 }}>{bike.year || '2024'}</Text>
+                    </View>
+                  </View>
                 </View>
               </View>
             </TouchableOpacity>
@@ -107,13 +135,31 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16, paddingVertical: 8,
     borderRadius: 999, marginRight: 8, borderWidth: 1,
   },
-  grid: {
-    flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12,
+  listWrap: {
+    paddingHorizontal: 16,
   },
-  card: {
-    width: '47%', marginHorizontal: '1.5%', marginBottom: 14, overflow: 'hidden',
+  gridWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: 12,
   },
-  cardImg: { width: '100%', height: 130, resizeMode: 'cover' },
+  cardList: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    marginBottom: 12,
+  },
+  cardGrid: {
+    width: '47%',
+    marginHorizontal: '1.5%',
+    marginBottom: 14,
+    overflow: 'hidden',
+    paddingBottom: 12,
+  },
+  imgList: { width: 110, height: 110, borderRadius: 10, resizeMode: 'cover' },
+  imgGrid: { width: '100%', height: 110, resizeMode: 'cover' },
+  detailsList: { flex: 1, marginLeft: 12, justifyContent: 'center' },
+  detailsGrid: { paddingHorizontal: 10, paddingTop: 10 },
   chipSmall: {
     paddingHorizontal: 10, paddingVertical: 4,
     borderRadius: 6, alignSelf: 'flex-start',

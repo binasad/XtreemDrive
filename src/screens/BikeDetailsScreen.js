@@ -17,19 +17,18 @@ import { useCardStyle } from '../components/Card';
 const { width } = Dimensions.get('window');
 
 const GALLERY = [
-  'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200',
-  'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=1200',
-  'https://images.unsplash.com/photo-1617531653332-bd46c24f2068?w=1200',
-  'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1200',
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuDp9BW8lWl2bN9ic3_2ekZkJ_pso4f8ZfO7bItRRTHdNvxTVgXDKKbRffw5j4ruyaSvVe21x34SatzLOIfUb6pzOcuHvXbGxAvGFNSMimiQ_mjMaRAFyowVyNM97aVK743G3s9mcBsoUt8h97Ga0jLWCwqcaeQqaSWqLTAnfFoCOqlFNozwZe9MUscbFxqN7VcSi-Uke9GZB4nzaJrCkjoOQSI_uou2q_QP6E12LFbzwdRepQfNVnC0zLpjUx6nxIjO99dbbkQD_MEH',
+  'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=1200',
+  'https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=1200',
 ];
 
 const FEATURES = [
   'ABS',
-  'Airbags',
-  'Alloy Rims',
-  'Cruise Control',
-  'Navigation System',
-  'Sunroof',
+  'Digital Speedometer',
+  'LED Headlights',
+  'Fuel Injection',
+  'Traction Control',
+  'Quick Shifter',
 ];
 
 function IconBtn({ icon, onPress, colors, accent }) {
@@ -50,23 +49,21 @@ function IconBtn({ icon, onPress, colors, accent }) {
   );
 }
 
-export default function CarDetailsScreen({ route, navigation }) {
+export default function BikeDetailsScreen({ route, navigation }) {
   const { colors, radius, mode } = useTheme();
   const specCardStyle = useCardStyle();
   const insets = useSafeAreaInsets();
   
-  const car = route?.params?.car || {
-    title: 'Porsche 911 Turbo S',
-    price: '$214,500',
-    location: 'Berlin',
+  const bike = route?.params?.bike || {
+    title: 'Kawasaki Ninja ZX-10R',
+    price: 'PKR 4,500,000',
+    location: 'DHA, Lahore',
     year: '2023',
-    mileage: '4,200 km',
-    type: 'Petrol',
-    registeredIn: 'Berlin',
-    exteriorColor: 'Silver',
-    assembly: 'Imported',
-    engineCapacity: '3745 cc',
-    bodyType: 'Coupe',
+    mileage: '1,200 km',
+    type: 'Manual',
+    registeredIn: 'Lahore',
+    bodyType: 'Sports',
+    engineCapacity: '998 cc',
     lastUpdated: '2 days ago',
   };
 
@@ -132,42 +129,34 @@ export default function CarDetailsScreen({ route, navigation }) {
               Premium Listing
             </Text>
             <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>
-              {car.title}
+              {bike.title}
             </Text>
-            <Text style={[styles.price, { color: isLight ? '#000000' : colors.primary, marginTop: 6 }]}>{car.price}</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6, marginBottom: 16 }}>
               <MaterialIcons name="location-on" size={14} color={colors.textDim} />
               <Text style={{ color: colors.textDim, fontSize: 13, marginLeft: 4 }}>
-                {car.location}
+                {bike.location}
               </Text>
             </View>
+            <Text style={[styles.price, { color: isLight ? '#000000' : colors.primary }]}>{bike.price}</Text>
           </View>
         </View>
 
-        {/* Key Specifications (restored from original design) */}
-        <View style={{ paddingHorizontal: 20, marginTop: 10 }}>
-          <View style={styles.specGrid}>
-            {[
-              { icon: 'speed', label: 'Mileage', value: '4,200 km' },
-              { icon: 'local-gas-station', label: 'Fuel', value: 'Petrol' },
-              { icon: 'settings', label: 'Transmission', value: 'Manual' },
-              { icon: 'bolt', label: 'Power', value: '640 hp' },
-              { icon: 'palette', label: 'Color', value: 'Silver' },
-              { icon: 'location-on', label: 'Location', value: 'Berlin' },
-            ].map((s) => (
-              <View
-                key={s.label}
-                style={[styles.specBox, specCardStyle, { borderRadius: radius.md }]}
-              >
-                <MaterialIcons name={s.icon} size={20} color={colors.primary} />
-                <Text style={{ color: colors.textMuted, fontSize: 11, marginTop: 6 }}>
-                  {s.label}
-                </Text>
-                <Text style={{ color: colors.text, fontWeight: '800', marginTop: 2 }}>
-                  {s.value}
-                </Text>
-              </View>
-            ))}
+        {/* Quick Stats Row */}
+        <View style={{ padding: 20, flexDirection: 'row', justifyContent: 'space-between' }}>
+          <View style={[styles.quickStatBox, { backgroundColor: isLight ? '#f5f6f7' : colors.surfaceHigh, borderRadius: radius.lg }]}>
+            <MaterialIcons name="calendar-today" size={24} color={colors.primary} />
+            <Text style={{ color: colors.textDim, fontSize: 10, textTransform: 'uppercase', letterSpacing: 1, marginTop: 8 }}>Year</Text>
+            <Text style={{ color: colors.text, fontWeight: '800', marginTop: 4 }}>{bike.year}</Text>
+          </View>
+          <View style={[styles.quickStatBox, { backgroundColor: isLight ? '#f5f6f7' : colors.surfaceHigh, borderRadius: radius.lg }]}>
+            <MaterialIcons name="speed" size={24} color={colors.primary} />
+            <Text style={{ color: colors.textDim, fontSize: 10, textTransform: 'uppercase', letterSpacing: 1, marginTop: 8 }}>Mileage</Text>
+            <Text style={{ color: colors.text, fontWeight: '800', marginTop: 4 }}>{bike.mileage}</Text>
+          </View>
+          <View style={[styles.quickStatBox, { backgroundColor: isLight ? '#f5f6f7' : colors.surfaceHigh, borderRadius: radius.lg }]}>
+            <MaterialIcons name="settings-input-component" size={24} color={colors.primary} />
+            <Text style={{ color: colors.textDim, fontSize: 10, textTransform: 'uppercase', letterSpacing: 1, marginTop: 8 }}>Type</Text>
+            <Text style={{ color: colors.text, fontWeight: '800', marginTop: 4 }}>{bike.type}</Text>
           </View>
         </View>
 
@@ -176,12 +165,10 @@ export default function CarDetailsScreen({ route, navigation }) {
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Technical Specs</Text>
           <View style={{ marginTop: 12 }}>
             {[
-              { label: 'Registered In', value: car.registeredIn },
-              { label: 'Exterior Color', value: car.exteriorColor },
-              { label: 'Assembly', value: car.assembly },
-              { label: 'Engine Capacity', value: car.engineCapacity },
-              { label: 'Body Type', value: car.bodyType },
-              { label: 'Last Updated', value: car.lastUpdated },
+              { label: 'Registered In', value: bike.registeredIn },
+              { label: 'Body Type', value: bike.bodyType },
+              { label: 'Engine Capacity', value: bike.engineCapacity },
+              { label: 'Last Updated', value: bike.lastUpdated },
             ].map((item, idx) => (
               <View key={idx} style={[styles.specRow, { borderBottomColor: isLight ? '#e0e0e0' : 'rgba(255,255,255,0.05)' }]}>
                 <Text style={{ color: colors.textDim }}>{item.label}</Text>
@@ -197,7 +184,7 @@ export default function CarDetailsScreen({ route, navigation }) {
             <MaterialIcons name="format-quote" size={80} color={isLight ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.03)'} style={{ position: 'absolute', top: 0, right: 10 }} />
             <Text style={[styles.sectionTitle, { color: colors.text, marginBottom: 12 }]}>Seller's Note</Text>
             <Text style={{ color: colors.textMuted, lineHeight: 22, fontSize: 14 }} numberOfLines={descExpanded ? undefined : 4}>
-              Factory-fresh Porsche 911 Turbo S with full service history, sport chrono package, and premium interior. Original paint, single owner, and every option box ticked. Includes Atelier certified inspection and 12-month warranty. Meticulously maintained and kept indoors. Serious buyers only.
+              Exceptional condition Kawasaki Ninja ZX-10R 2023. This is the ultimate track-focused machine, maintained with obsessive care. Zero accidents, original paint, and complete service history from authorized dealership. Includes aftermarket Akrapovic exhaust system (stock available) and ceramic coating applied recently. A true masterpiece for enthusiasts...
             </Text>
             <TouchableOpacity onPress={() => setDescExpanded(!descExpanded)} style={{ marginTop: 16, flexDirection: 'row', alignItems: 'center' }}>
               <Text style={{ color: colors.primary, fontWeight: '800', fontSize: 13 }}>
@@ -236,14 +223,14 @@ export default function CarDetailsScreen({ route, navigation }) {
           <TouchableOpacity style={[styles.sellerCard, { backgroundColor: isLight ? '#ffffff' : colors.surfaceHigh, borderRadius: radius.xl, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 4 }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <View style={{ width: 60, height: 60, borderRadius: 30, overflow: 'hidden', borderWidth: 2, borderColor: 'rgba(231,76,60,0.3)' }}>
-                <Image source={{ uri: 'https://i.pravatar.cc/150?img=12' }} style={{ width: '100%', height: '100%' }} />
+                <Image source={{ uri: 'https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?w=400' }} style={{ width: '100%', height: '100%' }} />
               </View>
               <View style={{ marginLeft: 16 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text style={{ color: colors.text, fontWeight: '800', fontSize: 16 }}>Premium Motors</Text>
+                  <Text style={{ color: colors.text, fontWeight: '800', fontSize: 16 }}>Hamza Ahmed</Text>
                   <MaterialIcons name="verified" size={16} color="#4bb543" style={{ marginLeft: 6 }} />
                 </View>
-                <Text style={{ color: colors.textDim, fontSize: 12, marginTop: 4 }}>Member since 2021</Text>
+                <Text style={{ color: colors.textDim, fontSize: 12, marginTop: 4 }}>Member since Oct 2021</Text>
               </View>
             </View>
             <MaterialIcons name="chevron-right" size={24} color={colors.textDim} />
@@ -262,7 +249,7 @@ export default function CarDetailsScreen({ route, navigation }) {
           <MaterialIcons name="sms" size={24} color={colors.primary} />
           <Text style={{ color: colors.textMuted, fontSize: 10, marginTop: 4, fontWeight: '700' }}>SMS</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navAction} onPress={() => navigation.navigate('Chat', { conversation: { id: 'c1', name: 'Premium Motors' } })}>
+        <TouchableOpacity style={styles.navAction} onPress={() => navigation.navigate('Chat', { conversation: { id: 'c1', name: 'Hamza Ahmed' } })}>
           <MaterialIcons name="chat" size={24} color={colors.primary} />
           <Text style={{ color: colors.textMuted, fontSize: 10, marginTop: 4, fontWeight: '700' }}>Chat</Text>
         </TouchableOpacity>
@@ -307,16 +294,12 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     fontStyle: 'italic',
   },
-  specGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: 20,
-    justifyContent: 'space-between',
-  },
-  specBox: {
-    width: '31%',
-    padding: 12,
-    marginBottom: 10,
+  quickStatBox: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    marginHorizontal: 4,
   },
   sectionTitle: {
     fontSize: 20,
